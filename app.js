@@ -1,16 +1,16 @@
 const express = require('express')
 require("dotenv").config();
 require("./config/database").connect();
-
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const auth = require("./middleware/auth");
 const User = require('./model/user')
 
 
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
 app.get("/", (req, res) =>{
     res.send("<h1>Hello from Auth system</h1>")
 });
@@ -86,7 +86,19 @@ if(user && await bcrypt.compare(password, user.password)){
 
     user.token = token
     user.password= undefined
-    res.status(200).json(user)
+    // res.status(200).json(user)
+
+    // if you want to use cookies
+    const options = {
+        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+    };
+
+    res.status(200).cookie('token', token, options).json({
+        success: true,
+        token,
+        user
+    })
 }
 res.send(400).send("email or password is incorrect")
     } catch (error) {
@@ -96,7 +108,7 @@ res.send(400).send("email or password is incorrect")
 })
 
 //16 video lco pro backend web vs mobile
-app.get("/dashboard", (req, res)=>{
+app.get("/dashboard", auth, (req, res)=>{
     res.send('welcome to secret information')
 });
 
