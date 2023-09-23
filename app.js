@@ -1,3 +1,4 @@
+
 const express = require('express')
 require("dotenv").config();
 require("./config/database").connect();
@@ -113,3 +114,5 @@ app.get("/dashboard", auth, (req, res)=>{
 });
 
 module.exports = app;
+
+ 
